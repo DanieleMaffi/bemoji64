@@ -1,38 +1,27 @@
 #include <stdio.h>
+#include <string.h>
 #include "encode.h"
 
 
-const char* set[] = {
-	"🗻", "🗼", "🗽", "🗾", "🗿", "😀", "😁", "😂", 
-	"😃", "😄", "😅", "😆", "😇", "😈", "😉", "😊", 
-	"😋", "😌", "😍", "😎", "😏", "😐", "😑", "😒",
-	"😓", "😔", "😕", "😖", "😗", "😘", "😙", "😚", 
-	"😛", "😜", "😝", "😞", "😟", "😠", "😡", "😢", 
-	"😣", "😤", "😥", "😦", "😧", "😨", "😩", "😪", 
-	"😫", "😬", "😭", "😮", "😯", "😰", "😱", "😲", 
-	"😳", "😴", "😵", "😶", "😷", "😸", "😹", "😺"
-};
-
-
 int main(int argc, char** argv) {
-	
-	printf("This is a test beacuse emojis in C are strings apparently: %s\n", set[2]);
-
-	if (argc != 2) {
-		fprintf(stderr, "Usage: %s <input file>\n", argv[0]);
+	if (argc < 2) {
+		fprintf(stderr, "Usage: %s (-d) <input file>\n", argv[0]);
 		return 1;								
 	}
-	
-	FILE* input_file = fopen(argv[1], "rb");
+
+	// Apparently 0 means equal and a negative number shorter
+	int is_decode = 0;
+	if (!strcmp(argv[1], "-d") && argc == 3)
+		is_decode = 1;
+
+	FILE* input_file = fopen(is_decode ? argv[2] : argv[1], "rb");
 	if (!input_file) {
 		perror("Failed to open input file");
 		return 1;
 	}
+	
+	is_decode ? decode(input_file) : encode(input_file);
 	fclose(input_file);
 	
-	encode();
-
-	printf("---------------------------- ENCODING DONE ----------------------------\n");
-
 	return 0;
 }

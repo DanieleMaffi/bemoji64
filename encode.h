@@ -3,6 +3,7 @@
 
 
 void encode();
+void decode();
 
 
 #endif
