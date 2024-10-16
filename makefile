@@ -14,7 +14,7 @@ TARGET = bemoji
 all: $(TARGET)
 
 $(TARGET): $(SRC:.c=.o)
-	$(CC) -o $@ $^
+	$(CC) -o $@ $^ -lm
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
