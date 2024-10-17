@@ -20,8 +20,14 @@ const char* set[] = {
 
 const int padding_position = 64;
 
-
-int decode_utf8_character(const unsigned char encoded[]) {
+/**
+ * Decodes a 4-byte UTF-8 encoded character into an integer representing an emoji.
+ *
+ * @param encoded  An array of 4 bytes representing a UTF-8 encoded character.
+ * @param size     The size of the encoded character (always 4 bytes in this case).
+ * @return         An integer representing the decoded emoji.
+ */
+int decode_utf8_character(const unsigned char encoded[], size_t size) {
 	unsigned char digits[6];
 
 	digits[5] = (encoded[0] & 4) >> 2;
@@ -37,35 +43,58 @@ int decode_utf8_character(const unsigned char encoded[]) {
 	return emoji;
 }
 
+/**
+ * Finds the index of the Base64-like emoji set corresponding to a given emoji.
+ *
+ * @param bemoji   The integer value of the emoji (from UTF-8 decoding).
+ * @return         The index of the emoji in the set array, or padding_position if not found.
+ */
 int find_bemoji_value(int bemoji) {
 	for (int i = 0; i < BASE; i++)
-		if (decode_utf8_character((unsigned char*)set[i]) == bemoji)
+		if (decode_utf8_character((unsigned char*)set[i], 4) == bemoji)
 			return i;
 	return padding_position;
 }
 
+/**
+ * Decodes a Base64-like encoded input stream from a file and prints the decoded characters.
+ *
+ * @param file  The input file pointer containing the encoded data.
+ */
 void decode(FILE* file) {
-	// printf("Decoding...\n");
-
-	unsigned char buffer[4];
+	unsigned char buffer[4 * 4];
 	unsigned char decoded[3];
+	int positions[4];
 	size_t bytes_read;	
-	int emoji, position;	
+	int emoji, decoded_number;	
 
-	while ((bytes_read = fread(buffer, 1, 4, file)) > 0) {
-		// if (bytes_read != 4)
-		// 	break;
-		emoji = decode_utf8_character(buffer);
-		position = find_bemoji_value(emoji);
-		printf("Decoded position: %d, emoji: %d: %s\n", position, emoji, set[position]);
+	while ((bytes_read = fread(buffer, 4, 4, file)) > 0) {
+		decoded_number = 0;
+		for (int i = 0; i < 4; i++) {	
+			emoji = decode_utf8_character(buffer + i * 4, 4);
+			positions[i] = find_bemoji_value(emoji);
+		}
+	
+		decoded[0] = (positions[0] << 2) | (positions[1] >> 4 & 0x03);
+		decoded[1] = (positions[1] << 4) | ((positions[2] >> 2) & 0x0F);
+		decoded[2] = ((positions[2] & 0x03) << 6) | positions[3];
+
+		if (positions[3] == padding_position) decoded_number = 2;
+        	if (positions[2] == padding_position) decoded_number = 1;
+		
+		for (int i = 0; i < 3 - decoded_number; i++)
+			printf("%c", decoded[i]);
 	}	
 
-	// printf("\n---------------------------- DECODING DONE ----------------------------\n");
+	printf("\n");
 }
 
+/**
+ * Encodes input data from a file into Base64-like format using emojis and prints the encoded output.
+ *
+ * @param file  The input file pointer containing the raw data to be encoded.
+ */
 void encode(FILE* file) {
-	// printf("Encoding...\n");
-
 	unsigned char buffer[3];
 	const char* encoded[4];
 	size_t bytes_read;
@@ -83,5 +112,4 @@ void encode(FILE* file) {
 	}
 	
 	printf("\n");
-	// printf("\n---------------------------- ENCODING DONE ----------------------------\n");
 }
