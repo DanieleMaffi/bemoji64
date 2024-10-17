@@ -23,6 +23,12 @@ $(TARGET): $(SRC:.c=.o)
 clean:
 	rm -f *.o $(TARGET)
 
+install:
+	cp $(TARGET) ~/.local/bin/$(TARGET)
+
+remove:
+	rm ~/.local/bin/$(TARGET)
+
 # Phony targets
 .PHONY: all clean
 
