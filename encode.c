@@ -85,8 +85,8 @@ void decode(FILE* file) {
 		for (int i = 0; i < 3 - decoded_number; i++)
 			printf("%c", decoded[i]);
 	}	
-
-	printf("\n");
+	fflush(stdout);
+	printf("\b");
 }
 
 /**
@@ -99,7 +99,7 @@ void encode(FILE* file) {
 	const char* encoded[4];
 	size_t bytes_read;
 
-	while ((bytes_read = fread(buffer, 1, 3, file)) > 0) {
+	while ((bytes_read = fread(buffer, sizeof(char), sizeof(buffer), file)) > 0) {
 		encoded[0] = set[buffer[0] >> 2];
 		encoded[1] = set[(((buffer[0] & 0x03) << 4) | (buffer[1] >> 4))];
 		encoded[2] = (bytes_read > 1) ? set[(((buffer[1] & 0x0F) << 2) 
