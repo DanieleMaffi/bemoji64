@@ -12,6 +12,14 @@ int main(int argc, char** argv) {
 
 	FILE* input_file;
 
+    if (argc == 2 && !strcmp(argv[1], "-h")) {
+        printf("Usage: bemoji64 [options] [file]\n");
+        printf("\nOptions:\n");
+        printf("  -h    Show this help message\n");
+        printf("  -d    Decode the file\n\n");
+        return 0;
+    }
+
 	// Apparently 0 means equal and a negative number shorter
 	int is_decode = 0;
 	if (argc >= 2 && !strcmp(argv[1], "-d"))
